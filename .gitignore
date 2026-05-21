@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environment
+robot-env/
+venv/
+.env/
+
+# Models (downloaded separately)
+/models/vosk-*
+/models/*.onnx
+/models/*.onnx.json
+/models/*.zip
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temp
+/tmp/
+*.tmp

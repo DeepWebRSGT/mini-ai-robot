@@ -1,0 +1,28 @@
+# === Mini AI Robot — Python Bağımlılıkları ===
+
+# ~~~ Ses Tanıma (STT) ~~~
+vosk>=0.3.45
+pyaudio>=0.2.14
+
+# ~~~ Ses Sentezi (TTS) ~~~
+piper-tts>=1.2.0
+sounddevice>=0.4.6
+numpy>=1.24.0
+
+# ~~~ Ekran (ILI9341 TFT) ~~~
+adafruit-circuitpython-rgb-display>=3.12.0
+adafruit-blinka>=8.0.0
+
+# ~~~ GPIO ~~~
+RPi.GPIO>=0.7.1
+
+# ~~~ Kamera (Opsiyonel) ~~~
+# mediapipe>=0.10.0
+# opencv-python>=4.8.0
+
+# ~~~ Coral TPU (Opsiyonel) ~~~
+# Raspberry Pi'de system package ile kurulur:
+# sudo apt install python3-pycoral
+
+# ~~~ Ollama LLM (Opsiyonel) ~~~
+requests>=2.28.0

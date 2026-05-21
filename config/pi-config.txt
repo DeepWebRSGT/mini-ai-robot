@@ -1,0 +1,60 @@
+# ============================================
+# Raspberry Pi OS — Donanım Yapılandırması
+# ============================================
+# Bu ayarları /boot/config.txt'ye (veya /boot/firmware/config.txt)
+# ekleyin, sonra sudo reboot
+
+# === I2S Ses (INMP441 Microfoon + MAX98357A Amplifier) ===
+dtoverlay=googlevoicehat-codec
+dtparam=i2s=on
+
+# === SPI (ILI9341 TFT Ekran) ===
+dtparam=spi=on
+dtparam=spi_speed=32000000
+
+# === I2C (MPU-6050 IMU) ===
+dtparam=i2c_arm=on
+
+# === GPIO ===
+gpio=17=ip,pd  # Buton (pull-down)
+gpio=22=op,dh  # LED
+gpio=18=op,dh  # Backlight PWM
+
+# === Kamera (Pi Camera Module 3) ===
+# Camera Module 3 için gerekli
+camera_auto_detect=1
+dtoverlay=imx708
+
+# === Performans ===
+# GPU hafızasını 128MB yap (AI modelleri için CPU'ya daha çok alan)
+gpu_mem=128
+
+# ARM frekansı sabit (2GB modelde, 4GB'de dinamik daha iyi)
+# arm_freq=1500
+
+# === Güç Tasarrufu (Batarya ile çalışırken) ===
+# WiFi kapalı (offline için)
+# dtoverlay=disable-wifi
+
+# Bluetooth kapalı
+# dtoverlay=disable-bt
+
+# USB güç tasarrufu
+# usb_max_current=1200
+
+# === Opsiyonel: Soğutucu fan PWM ===
+# dtoverlay=gpio-fan,gpiopin=14,temp=50000
+
+# ============================================
+echo "✅ Yapılandırma hazır!"
+echo ""
+echo "Yapılacaklar:"
+echo "  1. sudo raspi-config → Interface Options → SPI, I2C, Camera → Enable"
+echo "  2. Yapılandırmayı /boot/config.txt'ye ekle"
+echo "  3. sudo reboot"
+echo ""
+echo "Kontrol:"
+echo "  ls /dev/i2c-*    # I2C"
+echo "  ls /dev/spi*     # SPI"
+echo "  arecord -l       # I2S ses girişi"
+echo "  aplay -l         # I2S ses çıkışı"

@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini AI Robot — İKEA Tarzı Kurulum Kılavuzu</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#e8e2d9; color:#1a1a1a; font-family:'Inter',sans-serif; font-size:15px; line-height:1.6; counter-reset:step major-step; }
+  .page { max-width:900px; margin:40px auto; background:#fff; border-radius:8px; box-shadow:0 4px 24px rgba(0,0,0,0.15); overflow:hidden; }
+
+  /* KAPAK */
+  .cover { background:linear-gradient(135deg,#0f172a,#1e293b); padding:60px 40px; text-align:center; color:#e2e8f0; }
+  .cover h1 { font-size:38px; font-weight:800; color:#22d3ee; margin-bottom:8px; letter-spacing:-1px; }
+  .cover h1 span { color:#fbbf24; }
+  .cover .sub { font-size:16px; color:#94a3b8; margin-bottom:20px; }
+  .cover .model { display:inline-block; background:#1e293b; border:2px solid #334155; border-radius:10px; padding:10px 24px; font-size:12px; color:#64748b; font-family:'JetBrains Mono',monospace; margin-top:10px; }
+  .cover .ico { font-size:72px; margin-bottom:10px; display:block; }
+
+  /* İÇİNDEKİLER */
+  .toc { background:#f8f5f0; padding:30px 40px; border-bottom:2px solid #e2d9cc; }
+  .toc h2 { font-size:16px; text-transform:uppercase; letter-spacing:2px; color:#94a3b8; margin-bottom:12px; }
+  .toc ol { list-style:none; counter-reset:item; columns:2; column-gap:40px; }
+  .toc li { counter-increment:item; margin:4px 0; font-size:13px; }
+  .toc li::before { content:counter(item)"."; color:#22d3ee; font-weight:700; margin-right:6px; font-family:'JetBrains Mono',monospace; }
+  .toc a { color:#1a1a1a; text-decoration:none; }
+  .toc a:hover { color:#0284c7; }
+
+  /* İÇERİK */
+  .content { padding:40px; }
+
+  /* AŞAMA KUTUSU */
+  .step { margin-bottom:48px; counter-increment:major-step; }
+  .step-header { display:flex; align-items:center; gap:14px; margin-bottom:16px; padding:16px 20px; background:#f1f5f9; border-radius:10px; border-left:5px solid #22d3ee; }
+  .step-num { width:40px; height:40px; background:#22d3ee; color:#0f172a; font-weight:800; font-size:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'JetBrains Mono',monospace; }
+  .step-title { font-size:20px; font-weight:700; }
+  .step-meta { font-size:12px; color:#64748b; margin-left:auto; white-space:nowrap; }
+  .step-desc { font-size:14px; color:#475569; margin-top:4px; margin-left:54px; }
+
+  /* İÇ ADIMLAR */
+  .substep { margin:12px 0 12px 30px; padding:14px 18px; background:#fafaf9; border-radius:8px; border:1px solid #e2e8f0; }
+  .substep h4 { font-size:14px; font-weight:600; margin-bottom:6px; }
+  .substep h4 .tag { display:inline-block; font-size:10px; font-weight:600; padding:1px 8px; border-radius:10px; margin-right:6px; }
+  .tag-hardware { background:#dbeafe; color:#1e40af; }
+  .tag-software { background:#dcfce7; color:#166534; }
+  .tag-test { background:#fef3c7; color:#92400e; }
+  .tag-warning { background:#fee2e2; color:#991b1b; }
+
+  /* KOMUT KUTUSU */
+  .cmd { background:#0f172a; color:#e2e8f0; padding:12px 16px; border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.5; margin:8px 0; overflow-x:auto; white-space:pre-wrap; word-break:break-all; }
+  .cmd .prompt { color:#22d3ee; }
+  .cmd .comment { color:#64748b; font-style:italic; }
+
+  /* KUTU / UYARI */
+  .info { background:#ecfeff; border:1px solid #22d3ee; border-radius:8px; padding:12px 16px; font-size:13px; margin:12px 0; }
+  .info strong { color:#0e7490; }
+  .warn { background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:12px 16px; font-size:13px; margin:12px 0; }
+  .warn strong { color:#dc2626; }
+  .tip { background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:12px 16px; font-size:13px; margin:12px 0; }
+  .tip strong { color:#15803d; }
+  .checklist { margin:8px 0; padding:0; list-style:none; }
+  .checklist li { padding:4px 0 4px 24px; position:relative; font-size:13px; }
+  .checklist li::before { content:"☐"; position:absolute; left:0; color:#94a3b8; }
+  .checklist li.done::before { content:"☑"; color:#22c55e; }
+
+  /* GPIO PIN TABLOSU */
+  .pinmap { font-family:'JetBrains Mono',monospace; font-size:12px; border-collapse:collapse; margin:12px 0; width:100%; }
+  .pinmap th { background:#1e293b; color:#e2e8f0; padding:6px 8px; text-align:left; font-size:11px; }
+  .pinmap td { padding:4px 8px; border-bottom:1px solid #e2e8f0; }
+  .pinmap tr:hover { background:#f1f5f9; }
+  .pinmap .gpio { color:#22d3ee; font-weight:600; }
+
+  /* TEST KUTUSU */
+  .test-result { background:#f0fdf4; border:2px solid #22c55e; border-radius:8px; padding:12px 16px; margin:10px 0; font-size:13px; }
+  .test-result::before { content:"✅ BEKLENEN SONUÇ: "; font-weight:700; color:#15803d; }
+
+  /* MALZEME LİSTESİ */
+  .parts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:6px; margin:12px 0; }
+  .parts-item { background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 10px; font-size:12px; }
+  .parts-item .qty { display:inline-block; background:#22d3ee; color:#0f172a; border-radius:50%; width:20px; height:20px; text-align:center; font-weight:700; font-size:11px; line-height:20px; margin-right:6px; }
+
+  /* İLERLEME ÇUBUĞU */
+  .progress { display:flex; gap:4px; margin:20px 0; padding:0; }
+  .progress li { list-style:none; flex:1; height:6px; background:#e2e8f0; border-radius:3px; }
+  .progress li.done { background:#22d3ee; }
+
+  /* SAYFA SONU */
+  hr { border:none; border-top:2px dashed #e2d9cc; margin:40px 0; }
+
+  /* TABLET / MOBİL */
+  @media (max-width:640px) {
+    .content { padding:20px; }
+    .toc ol { columns:1; }
+    .step { margin-bottom:32px; }
+    .substep { margin-left:10px; }
+    .parts-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<!-- ============ KAPAK ============ -->
+<div class="cover">
+  <span class="ico">🤖</span>
+  <h1>Mini AI Robot</h1>
+  <p class="sub">Kurulum Kılavuzu — IKEA® tarzı, adım adım, her ayrıntıyla</p>
+  <div class="model">Model: MR-1 · Rev 2.0 · Raspberry Pi 4 · Offline AI</div>
+  <div style="margin-top:30px; font-size:12px; color:#64748b;">
+    ⏱️ Toplam süre: ~4-6 saat · 🔧 Zorluk: Orta · 🔌 Lehim gerekmez (Dupont kablolar)
+  </div>
+</div>
+
+<!-- ============ İÇİNDEKİLER ============ -->
+<div class="toc">
+  <h2>İçindekiler</h2>
+  <ol>
+    <li><a href="#s0">Malzeme Kontrolü</a></li>
+    <li><a href="#s1">SD Kart Hazırlığı + Pi OS Kurulum</a></li>
+    <li><a href="#s2">İlk Açılış + Yapılandırma</a></li>
+    <li><a href="#s3">Breadboard Test — Ses Sistemi</a></li>
+    <li><a href="#s4">Yazılım Kurulumu (Tüm Bağımlılıklar)</a></li>
+    <li><a href="#s5">Model İndirme (STT + TTS + LLM)</a></li>
+    <li><a href="#s6">Her Bileşenin Tek Tek Testi</a></li>
+    <li><a href="#s7">Ekran Bağlantısı + Test</a></li>
+    <li><a href="#s8">Buton + LED Testi</a></li>
+    <li><a href="#s9">Son Montaj — Kutuya Yerleştirme</a></li>
+    <li><a href="#s10">Güç Yönetimi (Batarya)</a></li>
+    <li><a href="#s11">İlk Çalıştırma + Sistemi Başlatma</a></li>
+    <li><a href="#s12">Sorun Giderme</a></li>
+    <li><a href="#s13">Otomatik Başlatma (Opsiyonel)</a></li>
+  </ol>
+</div>
+
+<div class="content">
+
+<!-- ============ ADIM 0 ============ -->
+<div class="step" id="s0">
+  <div class="step-header">
+    <div class="step-num">0</div>
+    <div class="step-title">📦 Malzeme Kontrolü</div>
+    <div class="step-meta">⏱️ 10 dk</div>
+  </div>
+  <p class="step-desc">Kutudan çıkan her şeyi kontrol et. Eksik parça varsa bu adımda fark et.</p>
+
+  <div class="substep">
+    <h4><span class="tag tag-hardware">A</span> Zorunlu Parçalar</h4>
+    <div class="parts-grid">
+      <div class="parts-item"><span class="qty">1</span> Raspberry Pi 4 (4GB veya 2GB)</div>
+      <div class="parts-item"><span class="qty">1</span> 64GB microSD (Class 10 / A1)</div>
+      <div class="parts-item"><span class="qty">1</span> INMP441 I2S Mikrofon</div>
+      <div class="parts-item"><span class="qty">1</span> MAX98357A I2S Amplifikatör</div>
+      <div class="parts-item"><span class="qty">1</span> 8Ω 1W Mini Speaker</div>
+      <div class="parts-item"><span class="qty">1</span> 2.8" ILI9341 SPI TFT Ekran</div>
+      <div class="parts-item"><span class="qty">1</span> 6×6mm Buton</div>
+      <div class="parts-item"><span class="qty">1</span> LED (herhangi renk) + 220Ω direnç</div>
+      <div class="parts-item"><span class="qty">1</span> PowerBoost 1000C</div>
+      <div class="parts-item"><span class="qty">1</span> 3.7V LiPo Batarya (3000+mAh)</div>
+      <div class="parts-item"><span class="qty">1</span> SPDT Kaydırmalı Şalter</div>
+      <div class="parts-item"><span class="qty">1</span> Dupont Kablo Seti (M-M, M-V, V-V)</div>
+      <div class="parts-item"><span class="qty">1</span> Breadboard (test için)</div>
+    </div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-hardware">B</span> Opsiyonel Parçalar</h4>
+    <div class="parts-grid">
+      <div class="parts-item"><span class="qty">1</span> Google Coral USB Accelerator</div>
+      <div class="parts-item"><span class="qty">1</span> Pi Camera Module 3 (CSI)</div>
+      <div class="parts-item"><span class="qty">1</span> MPU-6050 IMU (GY-521)</div>
+      <div class="parts-item"><span class="qty">1</span> PETG Filament (3D baskı için)</div>
+      <div class="parts-item"><span class="qty">1</span> M2.5/M3 Vida Seti</div>
+    </div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">C</span> Bilgisayarda Hazır Bulunması Gerekenler</h4>
+    <ul class="checklist">
+      <li>Raspberry Pi Imager (raspberrypi.com/software)</li>
+      <li>SD kart okuyucu (bilgisayarında varsa)</li>
+      <li>USB-C güç kablosu (Pi 4 için)</li>
+      <li>HDMI kablo + monitör (ilk kurulum için)</li>
+      <li>USB klavye + mouse</li>
+      <li>İnternet bağlantısı (Ethernet önerilir, WiFi da olur)</li>
+    </ul>
+  </div>
+
+  <div class="tip"><strong>İPUCU:</strong> İlk seferde HER ŞEYİ breadboard'da test et. Sonra kutuya monte et. Bu, kurtarılması zor hataları önler.</div>
+</div>
+
+<hr>
+
+<!-- ============ ADIM 1 ============ -->
+<div class="step" id="s1">
+  <div class="step-header">
+    <div class="step-num">1</div>
+    <div class="step-title">💾 SD Kart Hazırlığı + Pi OS Kurulum</div>
+    <div class="step-meta">⏱️ 20 dk</div>
+  </div>
+  <p class="step-desc">Raspberry Pi OS Bookworm 64-bit'i SD karta yaz. Bu işlemi KENDİ BİLGİSAYARINDA yap.</p>
+
+  <div class="substep">
+    <h4>1.1 — Raspberry Pi Imager'ı İndir ve Çalıştır</h4>
+    <p style="font-size:13px;margin-bottom:6px;">Adres: <a href="https://www.raspberrypi.com/software/" target="_blank">raspberrypi.com/software</a></p>
+    <p style="font-size:13px;">İndir → Kur → Çalıştır</p>
+  </div>
+
+  <div class="substep">
+    <h4>1.2 — İşletim Sistemi Seç</h4>
+    <div class="cmd">Raspberry Pi Device → Raspberry Pi 4<br>Operating System → Raspberry Pi OS (64-bit) → <strong>Raspberry Pi OS Lite</strong><br>Not: Lite = masaüstü yok, sadece terminal. Daha hızlı ve az RAM tüketir.<br>Eğer HDMI monitör kullanacaksan → Raspberry Pi OS with Desktop</div>
+  </div>
+
+  <div class="substep">
+    <h4>1.3 — Ön Yapılandırma (En Önemli Adım!)</h4>
+    <p style="font-size:13px;margin-bottom:6px;">"Edit Settings" butonuna tıkla. Şu ayarları YAP:</p>
+    <div class="cmd">General tab:<br>  · Hostname: mini-ai-robot<br>  · Username: pi<br>  · Password: <strong>kendin_belirle</strong><br>  · WiFi SSID: (evinin adı)<br>  · WiFi Password: (şifren)<br><br>Services tab:<br>  · SSH: ☑ Enable SSH → Use password authentication<br><br>NOT: SSH'yi aktif et ki kafan sıkışınca SSH ile bağlanabilesin.</div>
+  </div>
+
+  <div class="substep">
+    <h4>1.4 — SD Karta Yaz</h4>
+    <div class="cmd">SD kartı bilgisayara tak → "YES" yazılım formatlayacak → bekle (~5-10 dk)</div>
+    <div class="test-result">SD kart çıktı → Pi'ye tak → güç ver → yeşil LED yanıp sönmeye başlar</div>
+  </div>
+
+  <div class="info"><strong>🔍 KONTROL:</strong> SSH ile bağlan: <code style="background:#0f172a;color:#22d3ee;padding:1px 6px;border-radius:3px;">ssh pi@mini-ai-robot.local</code> veya <code style="background:#0f172a;color:#22d3ee;padding:1px 6px;border-radius:3px;">ssh pi@192.168.x.x</code> (IP adresini router'dan bul)</div>
+</div>
+
+<hr>
+
+<!-- ============ ADIM 2 ============ -->
+<div class="step" id="s2">
+  <div class="step-header">
+    <div class="step-num">2</div>
+    <div class="step-title">⚙️ İlk Açılış + Yapılandırma</div>
+    <div class="step-meta">⏱️ 15 dk</div>
+  </div>
+  <p class="step-desc">Pi'yi ilk kez aç, temel ayarları yap, donanım arayüzlerini etkinleştir.</p>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">2.1</span> SSH ile Bağlan (veya monitör+klavye kullan)</h4>
+    <div class="cmd"><span class="prompt">$</span> ssh pi@mini-ai-robot.local<br><span class="comment"># Şifreni gir → Pi'nin terminalini görüyorsun</span></div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">2.2</span> Sistemi Güncelle</h4>
+    <div class="cmd"><span class="prompt">$</span> sudo apt update && sudo apt upgrade -y<br><span class="prompt">$</span> sudo apt install -y git curl wget unzip i2c-tools</div>
+    <div class="info">Bu ~5-10 dk sürebilir. İnternet hızına bağlı.</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">2.3</span> SPI, I2C ve I2S'yi Etkinleştir (raspi-config)</h4>
+    <div class="cmd"><span class="prompt">$</span> sudo raspi-config</div>
+    <p style="font-size:13px;margin:6px 0;">Menüde sırayla şunları yap:</p>
+    <div class="cmd">1. Interface Options → SPI → Enable<br>2. Interface Options → I2C → Enable<br>3. Interface Options → SSH → Enable (zaten açık olmalı)<br>4. Interface Options → Camera → Enable (opsiyonel)<br>5. Performans Options → GPU Memory → 128 (AI için daha çok CPU RAM'i)<br>6. Finish → Reboot</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">2.4</span> I2S Ses Arayüzünü Aktif Et (En Kritik Adım)</h4>
+    <div class="cmd"><span class="prompt">$</span> sudo nano /boot/firmware/config.txt</div>
+    <p style="font-size:13px;margin:6px 0;">Dosyanın en altına şunları EKLE:</p>
+    <div class="cmd"># === Mini AI Robot — Donanım Ayarları ===<br>dtoverlay=googlevoicehat-codec<br>dtparam=i2s=on<br>dtparam=spi=on<br>dtparam=spi_speed=32000000<br>dtparam=i2c_arm=on<br>gpu_mem=128<br>gpio=17=ip,pd<br>gpio=22=op,dh<br># Kamera varsa:<br># dtoverlay=imx708</div>
+    <p style="font-size:13px;margin:6px 0;">Kaydet: Ctrl+X → Y → Enter</p>
+    <div class="cmd"><span class="prompt">$</span> sudo reboot</div>
+    <div class="test-result">Reboot sonrası SSH tekrar bağlan: <code>ls /dev/i2c-*</code> → <strong>/dev/i2c-1</strong> görmelisin<br><code>arecord -l</code> → <strong>**** List of CAPTURE Hardware Devices ****</strong> (ses kartı listelenmeli)</div>
+  </div>
+
+  <div class="warn">
+    <strong>⚠️ SIK KARŞILAŞILAN HATA:</strong> Eğer <code>/boot/firmware/config.txt</code> yoksa <code>/boot/config.txt</code>'yi dene (eski Pi OS sürümleri).<br>
+    <code>ls /boot/</code> ile hangi klasör olduğunu kontrol et.
+  </div>
+</div>
+
+<hr>
+
+<!-- ============ ADIM 3 ============ -->
+<div class="step" id="s3">
+  <div class="step-header">
+    <div class="step-num">3</div>
+    <div class="step-title">🔌 Breadboard Test — Ses Sistemi (I2S)</div>
+    <div class="step-meta">⏱️ 30 dk</div>
+  </div>
+  <p class="step-desc">Henüz lehimleme YOK. Her şeyi breadboard'da kur, test et, sonra kalıcı yap.</p>
+
+  <div class="substep">
+    <h4><span class="tag tag-hardware">3.1</span> INMP441 Mikrofon Bağlantısı</h4>
+    <p style="font-size:13px;margin-bottom:6px;">INMP441'in 6 pini var. Şöyle bağla:</p>
+    <table class="pinmap">
+      <tr><th>INMP441 Pini</th><th>→</th><th>Pi GPIO</th><th>Kablo Rengi</th></tr>
+      <tr><td>VDD (3.3V)</td><td>→</td><td>Pin 1 (3.3V)</td><td style="color:#dc2626">🔴 Kırmızı</td></tr>
+      <tr><td>GND</td><td>→</td><td>Pin 6 (GND)</td><td style="color:#525252">⚫ Siyah</td></tr>
+      <tr><td>SCK (I2S Clock)</td><td>→</td><td class="gpio">Pin 12 (GPIO18)</td><td style="color:#f59e0b">🟡 Sarı</td></tr>
+      <tr><td>WS (Word Select)</td><td>→</td><td class="gpio">Pin 35 (GPIO19)</td><td style="color:#f59e0b">🟡 Sarı</td></tr>
+      <tr><td>SD (Serial Data)</td><td>→</td><td class="gpio">Pin 38 (GPIO20)</td><td style="color:#f59e0b">🟡 Sarı</td></tr>
+      <tr><td>L/R (Left/Right)</td><td>→</td><td>GND (sol kanal)</td><td style="color:#525252">⚫ Siyah</td></tr>
+    </table>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-hardware">3.2</span> MAX98357A Amplifikatör Bağlantısı</h4>
+    <table class="pinmap">
+      <tr><th>MAX98357A Pini</th><th>→</th><th>Pi GPIO</th><th>Kablo Rengi</th></tr>
+      <tr><td>VIN (5V)</td><td>→</td><td>Pin 2 (5V)</td><td style="color:#dc2626">🔴 Kırmızı</td></tr>
+      <tr><td>GND</td><td>→</td><td>Pin 14 (GND)</td><td style="color:#525252">⚫ Siyah</td></tr>
+      <tr><td>BCLK</td><td>→</td><td class="gpio">Pin 12 (GPIO18)</td><td style="color:#f59e0b">🟡 Sarı</td></tr>
+      <tr><td>LRC</td><td>→</td><td class="gpio">Pin 35 (GPIO19)</td><td style="color:#f59e0b">🟡 Sarı</td></tr>
+      <tr><td>DIN</td><td>→</td><td class="gpio">Pin 40 (GPIO21)</td><td style="color:#f59e0b">🟡 Sarı</td></tr>
+    </table>
+    <div class="info"><strong>ÖNEMLİ:</strong> INMP441 ve MAX98357A aynı BCLK (GPIO18) ve LRCLK (GPIO19) pinlerini PAYLAŞIR. Bu NORMALDIR. I2S veri yolu böyle çalışır.</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-hardware">3.3</span> Speaker'ı Amplifikatöre Bağla</h4>
+    <table class="pinmap">
+      <tr><th>MAX98357A</th><th>→</th><th>Speaker</th></tr>
+      <tr><td>OUT+</td><td>→</td><td>Speaker (+) kırmızı kablo</td></tr>
+      <tr><td>OUT-</td><td>→</td><td>Speaker (-) siyah kablo</td></tr>
+    </table>
+    <div class="tip"><strong>İPUCU:</strong> Speaker'ın hangi ucu + hangisi - önemli değil. Her iki türlü de çalar (ters bağlarsan ses faz dışı kalır ama duyulur).</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-test">3.4</span> Ses Testi — Mikrofon Kaydı</h4>
+    <div class="cmd"><span class="prompt">$</span> sudo apt install -y alsa-utils<br><span class="prompt">$</span> arecord -l<br><span class="comment"># kart numarasını not et (genelde 0 veya 1)</span><br><span class="prompt">$</span> arecord -d 5 -f S16_LE -r 16000 -c 1 test.wav<br><span class="comment"># 5 saniye kaydeder. Mikrofona konuş!</span></div>
+    <div class="test-result">test.wav dosyası oluştu. Oynat: <code>aplay test.wav</code> — kendi sesini duymalısın.</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-test">3.5</span> Ses Testi — Hoparlör Çıkışı</h4>
+    <div class="cmd"><span class="prompt">$</span> speaker-test -t sine -f 440 -l 1<br><span class="comment"># 440Hz (La notası) test sesi duymalısın</span></div>
+    <div class="test-result">Hoparlörden 1 saniyelik "beeep" sesi gelir. Ses yoksa bağlantıları kontrol et.</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ============ ADIM 4 ============ -->
+<div class="step" id="s4">
+  <div class="step-header">
+    <div class="step-num">4</div>
+    <div class="step-title">📦 Yazılım Kurulumu</div>
+    <div class="step-meta">⏱️ 30 dk</div>
+  </div>
+  <p class="step-desc">GitHub'dan projeyi çek, tüm Python bağımlılıklarını kur.</p>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">4.1</span> Projeyi Klonla</h4>
+    <div class="cmd"><span class="prompt">$</span> cd /home/pi<br><span class="prompt">$</span> git clone https://github.com/DeepWebRSGT/mini-ai-robot.git<br><span class="prompt">$</span> cd mini-ai-robot</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">4.2</span> Sanal Ortam Oluştur</h4>
+    <div class="cmd"><span class="prompt">$</span> python3 -m venv robot-env<br><span class="prompt">$</span> source robot-env/bin/activate <span class="comment"># (robot-env) pi@mini-ai-robot:~$ görmelisin</span><br><span class="prompt">$</span> pip install --upgrade pip</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">4.3</span> Sistem Paketlerini Kur (Ses ve GPIO için)</h4>
+    <div class="cmd"><span class="prompt">$</span> sudo apt install -y python3-pip python3-venv \<br>  portaudio19-dev libatlas-base-dev espeak-ng \<br>  libsndfile1-dev libportaudio2</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">4.4</span> Python Bağımlılıklarını Kur</h4>
+    <div class="cmd"><span class="prompt">$</span> pip install vosk pyaudio piper-tts sounddevice numpy \<br>  adafruit-circuitpython-rgb-display adafruit-blinka \<br>  requests</div>
+    <div class="warn"><strong>⚠️ pyaudio derleme hatası:</strong> <code>sudo apt install portaudio19-dev</code> yapılı mı? Eğer hata alırsan <code>pip install pipwin && pipwin install pyaudio</code> dene.</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">4.5</span> Coral TPU Kütüphanesi (Opsiyonel — Sadece Coral takılıysa)</h4>
+    <div class="cmd"><span class="prompt">$</span> echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | sudo tee /etc/apt/sources.list.d/coral-edgetpu.list<br><span class="prompt">$</span> curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -<br><span class="prompt">$</span> sudo apt update<br><span class="prompt">$</span> sudo apt install -y libedgetpu1-max python3-pycoral</div>
+    <div class="info">libedgetpu1-<strong>max</strong> = maksimum performans (ısınır). libedgetpu1-<strong>std</strong> = daha soğuk, daha yavaş. Coral ısınırsa max→std geç.</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">4.6</span> MediaPipe (Opsiyonel — Kamera için)</h4>
+    <div class="cmd"><span class="prompt">$</span> pip install mediapipe opencv-python picamera2</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">4.7</span> Ollama (Opsiyonel — 4GB Pi, LLM modu için)</h4>
+    <div class="cmd"><span class="prompt">$</span> curl -fsSL https://ollama.com/install.sh | sh<br><span class="prompt">$</span> sudo systemctl enable ollama<br><span class="prompt">$</span> sudo systemctl start ollama</div>
+    <div class="test-result"><code>ollama list</code> → "No models found" (normal, henüz model indirmedik)</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ============ ADIM 5 ============ -->
+<div class="step" id="s5">
+  <div class="step-header">
+    <div class="step-num">5</div>
+    <div class="step-title">📥 Model İndirme</div>
+    <div class="step-meta">⏱️ 20 dk (indirme süresi)</div>
+  </div>
+  <p class="step-desc">AI modelleri internetten indirilir. Toplam ~500 MB. İnternet hızına bağlı olarak 5-20 dk sürebilir.</p>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">5.1</span> Otomatik İndiriciyi Çalıştır</h4>
+    <div class="cmd"><span class="prompt">$</span> cd /home/pi/mini-ai-robot<br><span class="prompt">$</span> source robot-env/bin/activate<br><span class="prompt">$</span> bash models/download_models.sh</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">5.2</span> İnen Dosyaları Kontrol Et</h4>
+    <div class="cmd"><span class="prompt">$</span> ls -la models/<br><span class="comment"># Görmen gerekenler:</span><br>drwxr-xr-x  vosk-model-small-nl-0.22/   ← ~42 MB · Hollandaca STT<br>-rw-r--r--  nl_NL-glow-tts-medium.onnx    ← ~63 MB · Hollandaca TTS</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">5.3</span> Vosk Türkçe Model (İsteğe bağlı — Türkçe konuşturmak için)</h4>
+    <div class="cmd"><span class="prompt">$</span> cd models<br><span class="prompt">$</span> wget https://alphacephei.com/vosk/models/vosk-model-small-tr-0.3.zip<br><span class="prompt">$</span> unzip vosk-model-small-tr-0.3.zip<br><span class="prompt">$</span> rm vosk-model-small-tr-0.3.zip<br><span class="prompt">$</span> cd ..</div>
+    <div class="tip"><strong>İPUCU:</strong> config.py'de <code>language: "tr"</code> yap ve <code>model_path</code>'i vosk-model-small-tr-0.3 olarak değiştir.</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">5.4</span> Ollama Modeli İndir (4GB Pi için — opsiyonel)</h4>
+    <div class="cmd"><span class="prompt">$</span> ollama pull qwen2.5:0.5b<br><span class="comment"># ~400 MB · Bu model 4GB Pi'de çalışır</span></div>
+    <div class="test-result"><code>ollama list</code> → qwen2.5:0.5b listede görünmeli</div>
+    <div class="warn"><strong>⚠️ 2GB Pi:</strong> Ollama'yı kurma! <code>config.py</code>'de <code>LLM.enabled = False</code> yap. Sadece intent-based sistem çalışır.</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ============ ADIM 6 ============ -->
+<div class="step" id="s6">
+  <div class="step-header">
+    <div class="step-num">6</div>
+    <div class="step-title">🧪 Her Bileşeni Tek Tek Test Et</div>
+    <div class="step-meta">⏱️ 30 dk</div>
+  </div>
+  <p class="step-desc">Modülleri bağımsız test et. Sorun varsa hangi bileşende olduğunu hemen bul.</p>
+
+  <div class="substep">
+    <h4><span class="tag tag-test">6.1</span> STT Testi (Mikrofon → Vosk → Metin)</h4>
+    <div class="cmd"><span class="prompt">$</span> cd /home/pi/mini-ai-robot<br><span class="prompt">$</span> source robot-env/bin/activate<br><span class="prompt">$</span> python src/stt.py</div>
+    <p style="font-size:13px;margin:6px 0;">Program "🎤 STT Test — Konuşmaya başla" yazacak. Mikrofona Hollandaca konuş:</p>
+    <div class="test-result">Örn: "hallo" dediğinde → <code>→ hallo</code> yazmalı. Çıkmıyorsa: <code>aplay test.wav</code> ile kaydı dinle (mikrofon çalışıyor mu?).</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-test">6.2</span> TTS Testi (Metin → Piper → Hoparlör)</h4>
+    <div class="cmd"><span class="prompt">$</span> python src/tts.py</div>
+    <div class="test-result">Hoparlörden "Hallo! Ik ben Mini AI Robot. Leuk je te ontmoeten!" cümlesi duyulmalı.</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-test">6.3</span> STT + TTS Entegrasyon Testi</h4>
+    <div class="cmd"><span class="prompt">$</span> python -c "<br>from src.stt import SpeechRecognizer<br>from src.tts import TextToSpeech<br>stt = SpeechRecognizer()<br>tts = TextToSpeech()<br>stt.start_microphone()<br>text = stt.listen(timeout=5)<br>stt.stop()<br>if text:<br>    tts.speak(f'Je zei: {text}')<br>"</div>
+    <div class="test-result">Konuş → 5 sn içinde robot "Je zei: [dediğin şey]" diye tekrar eder.</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-test">6.4</span> LLM Testi (4GB Pi — Opsiyonel)</h4>
+    <div class="cmd"><span class="prompt">$</span> python src/llm.py</div>
+    <div class="test-result"><code>✅ Ollama hazır — model: qwen2.5:0.5b</code> yazmalı ve "Hoe gaat het met je?" sorusuna cevap vermeli.</div>
+    <div class="warn"><strong>⚠️ İlk çalıştırmada YAVAŞ olabilir.</strong> Model henüz RAM'e yüklenmemiştir. İlk soru ~30 sn sürebilir, sonra daha hızlı olur.</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-test">6.5</span> Intent Classifier Testi</h4>
+    <div class="cmd"><span class="prompt">$</span> python src/intent.py</div>
+    <div class="test-result">Şu çıktıyı görmelisin:<br><code>'Hallo!' → greeting → 'Hallo! Ik ben Mini AI Robot! 🐱'</code><br><code>'Hoe laat is het?' → time → 'Het is nu ...'</code><br><code>'Doei!' → goodbye → 'Doei! Tot snel! 👋'</code></div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ============ ADIM 7 ============ -->
+<div class="step" id="s7">
+  <div class="step-header">
+    <div class="step-num">7</div>
+    <div class="step-title">🖥️ Ekran Bağlantısı + Test</div>
+    <div class="step-meta">⏱️ 20 dk</div>
+  </div>
+  <p class="step-desc">ILI9341 SPI TFT ekranı bağla, yüz ifadelerini test et.</p>
+
+  <div class="substep">
+    <h4><span class="tag tag-hardware">7.1</span> Bağlantılar</h4>
+    <table class="pinmap">
+      <tr><th>ILI9341 Pini</th><th>→</th><th>Pi GPIO</th><th>Kablo</th></tr>
+      <tr><td>VCC</td><td>→</td><td>Pin 1 (3.3V)</td><td style="color:#dc2626">🔴 Kırmızı</td></tr>
+      <tr><td>GND</td><td>→</td><td>Pin 6 (GND)</td><td style="color:#525252">⚫ Siyah</td></tr>
+      <tr><td>CS (Chip Select)</td><td>→</td><td class="gpio">Pin 24 (GPIO8 / CE0)</td><td style="color:#a78bfa">🟣 Mor</td></tr>
+      <tr><td>RESET</td><td>→</td><td class="gpio">Pin 18 (GPIO24)</td><td style="color:#a78bfa">🟣 Mor</td></tr>
+      <tr><td>DC (Data/Command)</td><td>→</td><td class="gpio">Pin 22 (GPIO25)</td><td style="color:#a78bfa">🟣 Mor</td></tr>
+      <tr><td>MOSI</td><td>→</td><td class="gpio">Pin 19 (GPIO10 / MOSI)</td><td style="color:#a78bfa">🟣 Mor</td></tr>
+      <tr><td>SCLK</td><td>→</td><td class="gpio">Pin 23 (GPIO11 / SCLK)</td><td style="color:#a78bfa">🟣 Mor</td></tr>
+      <tr><td>LED (Backlight)</td><td>→</td><td class="gpio">Pin 12 (GPIO18) — PWM</td><td style="color:#f59e0b">🟡 Sarı</td></tr>
+    </table>
+    <div class="info"><strong>NOT:</strong> ILI9341 3.3V mantık seviyesinde çalışır. Pi'nin 3.3V pinine bağla, 5V'ye takma — ekranı yakarsın!</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-test">7.2</span> Ekran Testi — Yüz İfadeleri</h4>
+    <div class="cmd"><span class="prompt">$</span> python src/display.py</div>
+    <div class="test-result">Ekranda sırayla şu ifadeler görünmeli:<br>neutral → happy → surprised → thinking → love → sad → angry → sleep<br><strong>Her ifade 1.5 saniye gösterilir.</strong></div>
+    <div class="warn"><strong>⚠️ Ekran BOŞ geliyorsa:</strong><br>1. <code>ls /dev/spi*</code> → /dev/spidev0.0 ve /dev/spidev0.1 görmelisin<br>2. Bağlantıları kontrol et (CS, DC, RST doğru pinlerde mi?)<br>3. pip ile doğru kütüphane kuruldu mu?</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ============ ADIM 8 ============ -->
+<div class="step" id="s8">
+  <div class="step-header">
+    <div class="step-num">8</div>
+    <div class="step-title">🔘 Buton + LED Testi</div>
+    <div class="step-meta">⏱️ 10 dk</div>
+  </div>
+  <p class="step-desc">Bas-konuş butonu ve durum LED'ini bağla, çalıştığını doğrula.</p>
+
+  <div class="substep">
+    <h4><span class="tag tag-hardware">8.1</span> Buton Bağlantısı</h4>
+    <table class="pinmap">
+      <tr><th>Buton</th><th>→</th><th>Pi GPIO</th></tr>
+      <tr><td>Bir Uç</td><td>→</td><td class="gpio">Pin 11 (GPIO17)</td></tr>
+      <tr><td>Diğer Uç</td><td>→</td><td>Pin 14 (GND)</td></tr>
+    </table>
+    <div class="info"><strong>İç Pull-Up:</strong> GPIO17'nin içinde 10kΩ direnç var. Harici direnç GEREKMEZ. Butona basınca GPIO GND'ye çekilir.</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-hardware">8.2</span> LED Bağlantısı</h4>
+    <table class="pinmap">
+      <tr><th>LED</th><th>→</th><th>Pi GPIO</th></tr>
+      <tr><td>Anot (+ uzun bacak)</td><td>→</td><td><strong>220Ω direnç</strong> → Pin 15 (GPIO22)</td></tr>
+      <tr><td>Katot (- kısa bacak)</td><td>→</td><td>Pin 34 (GND)</td></tr>
+    </table>
+    <div class="warn"><strong>⚠️ 220Ω DİRENÇ KULLANMAMAK GPIO'YU YAKAR!</strong> LED'ler 20mA çeker, GPIO maks 16mA verir. Direnç şart.</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-test">8.3</span> Buton + LED Testi</h4>
+    <div class="cmd"><span class="prompt">$</span> python src/button.py</div>
+    <div class="test-result">1. LED 2 kere yanıp söner (test)<br>2. "Butona bas (Ctrl+C çıkış)" yazar<br>3. Butona bas → LED 1 kere yanıp söner<br>4. Her basışta LED tepki verir</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ============ ADIM 9 ============ -->
+<div class="step" id="s9">
+  <div class="step-header">
+    <div class="step-num">9</div>
+    <div class="step-title">🏗️ Son Montaj — Her Şeyi Birleştir</div>
+    <div class="step-meta">⏱️ 45 dk</div>
+  </div>
+  <p class="step-desc">Artık her parça breadboard'da çalıştı. Şimdi kalıcı montaja geç.</p>
+
+  <div class="substep">
+    <h4><span class="tag tag-hardware">9.1</span> Breadboard'dan Çıkarma Sırası</h4>
+    <ol style="padding-left:20px;font-size:13px;">
+      <li><strong>Gücü KES</strong> (Pi'yi kapat, güç kablosunu çek)</li>
+      <li>Her bağlantının FOTOĞRAFINI ÇEK (sonra başvurmak için)</li>
+      <li>Kabloları breadboard'dan TEK TEK sök</li>
+      <li>Her kabloyu olduğu gibi bırak (uçları aynı)</li>
+    </ol>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-hardware">9.2</span> Montaj Sırası (Kutuya)</h4>
+    <ol style="padding-left:20px;font-size:13px;">
+      <li><strong>Pi 4'ü</strong> kutu tabanına vidalarla sabitle (M2.5 vida + ara parça)</li>
+      <li><strong>PowerBoost 1000C</strong> → Pi'nin yanına (M2.5 vidalar veya çift taraflı bant)</li>
+      <li><strong>LiPo batarya</strong> → en alta, hareket etmeyecek şekilde</li>
+      <li><strong>SPDT şalter</strong> → kutunun yan yüzüne (PowerBoost ile batarya arası)</li>
+      <li><strong>ILI9341 ekran</strong> → kutunun ön yüzüne (ya 3D baskıya gömülü, ya çift taraflı bant)</li>
+      <li><strong>INMP441 mikrofon</strong> → kutunun üst/ön kısmında, ses alacak şekilde (küçük delik aç)</li>
+      <li><strong>MAX98357A + speaker</strong> → yan veya alt kısımda</li>
+      <li><strong>Buton</strong> → yan yüzde, kolay erişilebilir yerde</li>
+      <li><strong>LED</strong> → ön yüzde (görülebilecek yerde)</li>
+      <li><strong>Kablo yönetimi</strong> → kabloları bük, zip tie ile topla</li>
+    </ol>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-hardware">9.3</span> Bağlantıları Sıkılaştır</h4>
+    <p style="font-size:13px;">Dupont kablolar zamanla gevşeyebilir. Şunları yap:</p>
+    <ul class="checklist">
+      <li>Kritik bağlantıları (güç, I2S) sıcak silikonla sabitle</li>
+      <li>Kabloları kısalt (gereksiz uzunlukları kes)</li>
+      <li>Her bağlantıyı çektirerek test et (gevşek var mı?)</li>
+      <li>Kısa devre riskine karşı açıkta kalan pinleri kontrol et</li>
+    </ul>
+  </div>
+
+  <div class="warn"><strong>⚠️ İLK AÇILIŞ:</strong> Kutuya monte ettikten sonra <strong>ÖNCE güç şalterini aç</strong>, PowerBoost'un LED'i yanmalı (şarj/çalışma). Sonra Pi açılır. İlk seferde ekranı, sesi, butonu tekrar test et.</div>
+</div>
+
+<hr>
+
+<!-- ============ ADIM 10 ============ -->
+<div class="step" id="s10">
+  <div class="step-header">
+    <div class="step-num">10</div>
+    <div class="step-title">🔋 Güç Yönetimi (Batarya)</div>
+    <div class="step-meta">⏱️ 15 dk</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-hardware">10.1</span> Kablo Bağlantı Şeması (Güç)</h4>
+    <div class="cmd">LiPo (+) ── SPDT Şalter ── PowerBoost Bat(+) ── PowerBoost 5V ── Pi USB-C (5V pin)<br>
+LiPo (-) ───────────────── PowerBoost Bat(-) ── PowerBoost GND ── Pi GND</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-hardware">10.2</span> Şarj Etme</h4>
+    <ul class="checklist">
+      <li>PowerBoost 1000C'nin USB-C portuna mikroUSB kablo tak</li>
+      <li>Şarj olurken PowerBoost'taki LED yanar</li>
+      <li>Tam dolunca LED söner (3000mAh için ~3 saat)</li>
+      <li>Şarj ederken robot KAPALI olmalı (şalter OFF)</li>
+    </ul>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-hardware">10.3</span> Pil Ömrü</h4>
+    <div class="cmd">3000mAh · Pi 4 idle: ~600mA · Pi 4 AI çalışırken: ~900-1200mA<br><br>Tahmini:<br>  · Bekleme (buton bekleme): ~5 saat<br>  · Aktif kullanım (konuşma): ~2-3 saat<br>  · LLM çalışırken (4GB Pi): ~1.5-2 saat</div>
+  </div>
+
+  <div class="warn"><strong>⚠️ LiPo GÜVENLİĞİ:</strong><br>
+  · LiPo bataryayı DELME, EZME, ISLATMA<br>
+  · Şişerse hemen kullanmayı bırak, güvenli şekilde at<br>
+  · LiPo şarj için ÖZEL şarj cihazı kullan (PowerBoost'un içinde koruma var)<br>
+  · Kısa devre yapma — yangın çıkabilir!
+  </div>
+</div>
+
+<hr>
+
+<!-- ============ ADIM 11 ============ -->
+<div class="step" id="s11">
+  <div class="step-header">
+    <div class="step-num">11</div>
+    <div class="step-title">🚀 İlk Çalıştırma</div>
+    <div class="step-meta">⏱️ 10 dk</div>
+  </div>
+  <p class="step-desc">Tüm sistemi başlat, robotla konuş!</p>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">11.1</span> Ana Programı Çalıştır</h4>
+    <div class="cmd"><span class="prompt">$</span> cd /home/pi/mini-ai-robot<br><span class="prompt">$</span> source robot-env/bin/activate<br><span class="prompt">$</span> python src/main.py</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-test">11.2</span> Beklenen Çıktı</h4>
+    <div class="cmd">🤖 Mini AI Robot başlatılıyor...<br>✅ Buton ve LED hazır<br>✅ Ekran hazır<br>✅ STT (Vosk) hazır<br>✅ TTS (Piper) hazır<br>✅ Intent sınıflandırıcı hazır<br>✅ LLM hazır — akıllı mod aktif!<br>📦 Yüklenen bileşenler: ...<br>🎯 Çalışma modu: LLM (veya INTENT)<br>🤖 Robot hazır! Butona bas ve konuş.<br><br>🤖 Mini AI Robot çalışıyor!<br>  Butona bas → konuş → robot cevaplar<br>  Ctrl+C ile çıkış</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-test">11.3</span> Test Senaryoları</h4>
+    <table class="pinmap">
+      <tr><th>Ne söyle</th><th>Beklenen</th></tr>
+      <tr><td>"Hallo!"</td><td>Robot gülümser + "Hallo! Ik ben Mini AI Robot!" der</td></tr>
+      <tr><td>"Hoe laat is het?"</td><td>Saati söyler</td></tr>
+      <tr><td>"Vertel een grap"</td><td>Bir şaka yapar</td></tr>
+      <tr><td>"Doei!"</td><td>"Doei! Tot snel!" der ve uyku moduna geçer</td></tr>
+      <tr><td>(LLM modunda) "Wat is AI?"</td><td>LLM cevap verir (yavaş, ~10-20 saniye)</td></tr>
+    </table>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">11.4</span> Çıkış</h4>
+    <div class="cmd">Ctrl+C → "🛑 Kapatılıyor..." → "👋 Robot kapandı. Görüşürüz!"</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ============ ADIM 12 ============ -->
+<div class="step" id="s12">
+  <div class="step-header">
+    <div class="step-num">12</div>
+    <div class="step-title">🔧 Sorun Giderme</div>
+    <div class="step-meta">⏱️ Her zaman</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-warning">SORUN</span> Hoparlörden ses gelmiyor</h4>
+    <p style="font-size:13px;">1. <code>speaker-test -t sine -f 440 -l 1</code> dene → ses yoksa bağlantıyı kontrol et<br>
+    2. MAX98357A 5V ile besleniyor mu? (Pin 2)<br>
+    3. BCLK/LRC/DIN doğru pinlerde mi?<br>
+    4. <code>dtoverlay=googlevoicehat-codec</code> config.txt'de var mı?<br>
+    5. Ses seviyesi: <code>alsamixer</code> → F6 → seç "googlevoicehat" → yukarı ok tuşuyla sesi aç</p>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-warning">SORUN</span> Vosk "Model bulunamadı" hatası</h4>
+    <p style="font-size:13px;">1. Model indi mi? <code>ls /home/pi/mini-ai-robot/models/</code><br>
+    2. <code>config.py</code>'de <code>model_path</code> doğru yolu gösteriyor mu?<br>
+    3. Elle dene: <code>python -c "from vosk import Model; m=Model('models/vosk-model-small-nl-0.22'); print('OK')"</code></p>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-warning">SORUN</span> Ekran beyaz / boş</h4>
+    <p style="font-size:13px;">1. <code>ls /dev/spi*</code> → spi cihazları görünüyor mu?<br>
+    2. <code>raspi-config</code> → SPI etkin mi?<br>
+    3. CS pinini kontrol et (CE0 = Pin 24, GPIO8)<br>
+    4. Ekrana 3.3V gidiyor mu? (5V takarsan ekranı yakabilirsin)</p>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-warning">SORUN</span> Buton çalışmıyor</h4>
+    <p style="font-size:13px;">1. GPIO17'ye pull-up var mı? (GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP))<br>
+    2. Butonun diğer ucu GND'de mi?<br>
+    3. <code>python -c "import RPi.GPIO as g; g.setmode(g.BCM); g.setup(17,g.IN,pull_up_down=g.PUD_UP); print(g.input(17))"</code><br>
+    → basılı değilken <strong>1</strong>, basılıyken <strong>0</strong> görmelisin</p>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-warning">SORUN</span> Ollama çalışmıyor / çok yavaş</h4>
+    <p style="font-size:13px;">1. <code>sudo systemctl status ollama</code> → çalışıyor mu?<br>
+    2. 4GB Pi kullanıyor musun? 2GB Pi'de LLM çalışmaz<br>
+    3. İlk soru her zaman yavaştır (model RAM'e yüklenir)<br>
+    4. Daha küçük model dene: <code>ollama pull tinyllama:1.1b-q4</code> (daha hızlı ama daha az zeki)</p>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-warning">SORUN</span> "ImportError: No module named 'board'"</h4>
+    <p style="font-size:13px;"><code>pip install adafruit-blinka</code> yap. Hala olmazsa: <code>pip install adafruit-circuitpython-rgb-display</code></p>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-warning">SORUN</span> RPi.GPIO hatası</h4>
+    <p style="font-size:13px;">Kitaptaki kodlar bilgisayarında test edildiği için RPi.GPIO bulamaz. Bu NORMALDİR. Sadece Pi'de çalışır. Bilgisayarda test için GPIO hatalarını yoksayabilirsin.</p>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-warning">SORUN</span> "arecord: device not found"</h4>
+    <p style="font-size:13px;">1. <code>dtoverlay=googlevoicehat-codec</code> config.txt'ye ekledin mi? reboot yaptın mı?<br>
+    2. <code>lsmod | grep snd</code> → ses modülleri yüklü mü?<br>
+    3. <code>sudo nano /etc/modules</code> → alt satıra <code>snd-soc-googlevoicehat-codec</code> ekle</p>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-warning">HİÇBİR ŞEY ÇALIŞMIYORSA</span> Fabrika Ayarlarına Dön</h4>
+    <div class="cmd"><span class="prompt">$</span> # 1. SD kartı çıkar, bilgisayara tak<br><span class="prompt">$</span> # 2. Raspberry Pi Imager ile sıfırdan yaz<br><span class="prompt">$</span> # 3. Adım 1'den başla<br><span class="comment">Bu ~20 dk kaybettirir ama %100 çalışır.</span></div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ============ ADIM 13 ============ -->
+<div class="step" id="s13">
+  <div class="step-header">
+    <div class="step-num">13</div>
+    <div class="step-title">⚡ Otomatik Başlatma (Her Açılışta Robot Çalışsın)</div>
+    <div class="step-meta">⏱️ 10 dk</div>
+  </div>
+  <p class="step-desc">Pi'yi açtığında robotun kendiliğinden başlaması için systemd servisi kur.</p>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">13.1</span> Servis Dosyası Oluştur</h4>
+    <div class="cmd"><span class="prompt">$</span> sudo nano /etc/systemd/system/mini-ai-robot.service</div>
+    <p style="font-size:13px;margin:6px 0;">İçine şunu yapıştır:</p>
+    <div class="cmd">[Unit]<br>Description=Mini AI Robot<br>After=network.target sound.target<br><br>[Service]<br>Type=simple<br>User=pi<br>WorkingDirectory=/home/pi/mini-ai-robot<br>Environment="PATH=/home/pi/mini-ai-robot/robot-env/bin:/usr/bin:/bin"<br>ExecStart=/home/pi/mini-ai-robot/robot-env/bin/python src/main.py<br>Restart=on-failure<br>RestartSec=5<br><br>[Install]<br>WantedBy=multi-user.target</div>
+    <p style="font-size:13px;margin:6px 0;">Kaydet: Ctrl+X → Y → Enter</p>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">13.2</span> Servisi Aktif Et</h4>
+    <div class="cmd"><span class="prompt">$</span> sudo systemctl daemon-reload<br><span class="prompt">$</span> sudo systemctl enable mini-ai-robot.service<br><span class="prompt">$</span> sudo systemctl start mini-ai-robot.service</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-test">13.3</span> Kontrol</h4>
+    <div class="cmd"><span class="prompt">$</span> sudo systemctl status mini-ai-robot.service</div>
+    <div class="test-result">"active (running)" yazmalı. Hata varsa: <code>sudo journalctl -u mini-ai-robot.service -n 20</code> ile logları gör.</div>
+  </div>
+
+  <div class="substep">
+    <h4><span class="tag tag-software">13.4</span> Durdurma / Yeniden Başlatma</h4>
+    <div class="cmd"><span class="prompt">$</span> sudo systemctl stop mini-ai-robot.service   <span class="comment"># Durdur</span><br><span class="prompt">$</span> sudo systemctl restart mini-ai-robot.service <span class="comment"># Yeniden başlat</span><br><span class="prompt">$</span> sudo systemctl disable mini-ai-robot.service  <span class="comment"># Otomatik başlamasını kapat</span></div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ============ SON KONTROL LİSTESİ ============ -->
+<div style="background:#f0fdf4; border:2px solid #22c55e; border-radius:12px; padding:24px 28px; margin-top:32px;">
+  <h3 style="color:#15803d; margin-bottom:12px;">✅ KURULUM TAMAMLAMA KONTROL LİSTESİ</h3>
+  <ul class="checklist">
+    <li class="done">SD karta Pi OS yazıldı (SSH + WiFi önceden ayarlandı)</li>
+    <li class="done">SSH bağlantısı çalışıyor (<code>ssh pi@mini-ai-robot.local</code>)</li>
+    <li class="done">SPI, I2C, I2S raspi-config'den etkinleştirildi</li>
+    <li class="done">config.txt'ye I2S + donanım ayarları eklendi ve reboot yapıldı</li>
+    <li class="done">Ses sistemi test edildi (<code>arecord</code> + <code>speaker-test</code>)</li>
+    <li class="done">GitHub'dan proje clone'landı</li>
+    <li class="done">Python venv oluşturuldu ve pip ile bağımlılıklar kuruldu</li>
+    <li class="done">Vosk + Piper modelleri indirildi</li>
+    <li class="done">Ollama kuruldu ve qwen2.5:0.5b indirildi (4GB Pi)</li>
+    <li class="done">STT testi: mikrofondan metin çözüldü</li>
+    <li class="done">TTS testi: hoparlörden ses geldi</li>
+    <li class="done">Ekran testi: yüz ifadeleri görüntülendi</li>
+    <li class="done">Buton testi: LED yanıp söndü</li>
+    <li class="done">Ana program (<code>python src/main.py</code>) çalıştırıldı ve robot konuştu</li>
+    <li class="done">Kalıcı montaj yapıldı (kutuya yerleştirme)</li>
+    <li class="done">Güç yönetimi bağlandı (LiPo + PowerBoost + şalter)</li>
+    <li class="done">Her şey kapatılıp tekrar açıldı, robot hala çalışıyor</li>
+    <li class="done">(Opsiyonel) systemd servisi kuruldu, otomatik başlatma aktif</li>
+  </ul>
+  <p style="font-size:14px;color:#15803d;margin-top:12px;font-weight:700;">Tüm maddeler işaretli → ROBOTUN HAZIR! 🎉</p>
+</div>
+
+<!-- ============ ALT BİLGİ ============ -->
+<div style="margin-top:30px; padding:16px 24px; background:#f8f5f0; border-radius:8px; font-size:12px; color:#64748b; text-align:center;">
+  <p><strong>Mini AI Robot MR-1</strong> · Rev 2.0 · 2026</p>
+  <p>GitHub: <a href="https://github.com/DeepWebRSGT/mini-ai-robot" target="_blank">github.com/DeepWebRSGT/mini-ai-robot</a></p>
+  <p style="margin-top:4px;">Komutlar <code>~/mini-ai-robot/</code> dizininde ve <code>robot-env</code> sanal ortamı aktifken çalıştırılır.</p>
+  <p style="margin-top:8px; font-size:10px; color:#94a3b8;">Bu kılavuz IKEA® tarzında hazırlanmıştır. IKEA® IKEA Systems B.V. ticari markasıdır.</p>
+</div>
+
+</div><!-- /.content -->
+</div><!-- /.page -->
+
+</body>
+</html>

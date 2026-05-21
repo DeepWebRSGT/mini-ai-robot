@@ -210,6 +210,3 @@ Bir kullanıcı şöyle dedi:
 | İletişim | 9/10 | Duruma göre adaptasyon |
 
 ---
-
-*Rapor sonu. Hermes Agent (DeepSeek-reasoner) tarafından Mayıs 2026'da hazırlanmıştır.*  
-*Sorularınız varsa — açıklama, örnek veya canlı demo — sormaktan çekinmeyin.*

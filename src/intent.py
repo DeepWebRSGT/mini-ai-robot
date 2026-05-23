@@ -36,7 +36,7 @@ class IntentClassifier:
                     "yağmur", "güneş"],
         "name": ["hoe heet", "naam", "wie ben", "adın", "ismin", "sen kimsin"],
         "how_are_you": ["hoe gaat", "alles goed", "met jou", "maak je het",
-                        "nasılsın", "iyi misin"],
+                        "nasılsın", "iyi misin", "iyi"],
         "joke": ["grap", "mop", "plezier", "lachen", "şaka", "fıkra"],
         "music": ["muziek", "liedje", "zingen", "şarkı", "müzik", "çal"],
         "goodbye": ["doei", "tot ziens", "dag", "later", "görüşürüz",
@@ -67,27 +67,42 @@ class IntentClassifier:
         except Exception as e:
             logger.warning(f"Coral TPU başlatılamadı: {e}")
 
+    @staticmethod
+    def _normalize_turkish(text):
+        """Türkçe karakter normalizasyonu (İ, I, ı, Ş, Ç, Ö, Ü, Ğ)"""
+        replacements = {
+            'İ': 'i', 'I': 'ı', 'Ş': 'ş', 'Ç': 'ç',
+            'Ö': 'ö', 'Ü': 'ü', 'Ğ': 'ğ',
+        }
+        result = []
+        for ch in text:
+            if ch in replacements:
+                result.append(replacements[ch])
+            else:
+                result.append(ch.lower())
+        return ''.join(result)
+
     def classify(self, text):
         """Metnin niyetini belirle
-        
+
         Önce Coral TPU dener (varsa), keyword fallback kullanır.
-        
+
         Returns:
             str: Intent adı (greeting, time, weather, ...)
         """
         if not text:
             return "unknown"
 
-        text_lower = text.lower().strip()
-        
+        text_normalized = self._normalize_turkish(text).strip()
+
         # Coral TPU ile sınıflandırma
         if self.interpreter:
-            coral_intent = self._classify_coral(text_lower)
+            coral_intent = self._classify_coral(text_normalized)
             if coral_intent:
                 return coral_intent
 
         # Fallback: keyword eşleme
-        return self._classify_keyword(text_lower)
+        return self._classify_keyword(text_normalized)
 
     def _classify_coral(self, text):
         """Coral TPU'da TFLite modeli çalıştır"""
@@ -99,18 +114,18 @@ class IntentClassifier:
             # önceden eğitilmiş embedding gerekli)
             # NOT: Burada gerçek bir TFLite modeliniz olmalı
             input_tensor = common.input_tensor(self.interpreter, 0)
-            
+
             # Model giriş boyutuna göre padding/truncate
             max_len = input_tensor.shape[1]
             char_indices = [min(ord(c) % 128, 127) for c in text[:max_len]]
             char_indices += [0] * (max_len - len(char_indices))
-            
+
             input_tensor[0] = char_indices
             self.interpreter.invoke()
-            
+
             output = common.output_tensor(self.interpreter, 0)
             intent_id = int(np.argmax(output[0]))
-            
+
             if intent_id < len(self.intents):
                 return self.intents[intent_id]
 
@@ -137,8 +152,8 @@ class IntentClassifier:
         best_intent = max(scores, key=scores.get)
         best_score = scores[best_intent]
 
-        # Çok düşük skor → unknown
-        if best_score == 1 and len(text) < 5:
+        # Çok düşük skor → unknown (sadece 1-2 harf kelimeler)
+        if best_score == 1 and len(text) < 3:
             return "unknown"
 
         return best_intent
@@ -166,10 +181,10 @@ class IntentResponder:
 
     def respond(self, intent):
         """Niyete göre yanıt seç
-        
+
         Args:
             intent: Intent adı (greeting, time, ...)
-        
+
         Returns:
             str: Yanıt metni
         """
@@ -198,10 +213,10 @@ if __name__ == "__main__":
     # Test
     logging.basicConfig(level=logging.INFO)
     print("🎯 Intent Classifier Test")
-    
+
     classifier = IntentClassifier()
     responder = IntentResponder(language="nl")
-    
+
     test_texts = [
         "Hallo!",
         "Hoe laat is het?",
@@ -211,10 +226,10 @@ if __name__ == "__main__":
         "Vertel eens een grap",
         "Wat is de hoofdstad van Nederland?",  # unknown
     ]
-    
+
     for text in test_texts:
         intent = classifier.classify(text)
         response = responder.respond(intent)
         print(f"  '{text}' → {intent} → '{response}'")
-    
+
     print("✅ Test tamamlandı")
